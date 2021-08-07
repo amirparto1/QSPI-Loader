@@ -63,8 +63,8 @@ all:
 main-build: QSPI-Loader.elf secondary-outputs
 
 # Tool invocations
-QSPI-Loader.elf: $(OBJS) $(USER_OBJS) C:\Users\Amir\STM32CubeIDE\workspace_1.7.0\QSPI-Loader\Drivers\Loader\linker.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "QSPI-Loader.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Amir\STM32CubeIDE\workspace_1.7.0\QSPI-Loader\Drivers\Loader\linker.ld" --specs=nosys.specs -Wl,-Map="QSPI-Loader.map" -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+QSPI-Loader.elf: $(OBJS) $(USER_OBJS) D:\Git\Titrator-HMI-Phase1\QSPI-Loader\Drivers\Loader\linker.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "QSPI-Loader.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"D:\Git\Titrator-HMI-Phase1\QSPI-Loader\Drivers\Loader\linker.ld" --specs=nosys.specs -Wl,-Map="QSPI-Loader.map" -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
