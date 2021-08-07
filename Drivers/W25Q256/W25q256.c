@@ -105,30 +105,49 @@ extern QSPI_HandleTypeDef QSPIHandle;
  * @{
  */
 
-/**
- * @brief  Initializes the QSPI interface.
- * @retval QSPI memory status
- */
-uint8_t BSP_QSPI_Init(void)
+uint8_t BSP_QSPI_QE(void)
 {
-//	MX_QUADSPI_Init();
 	QSPI_CommandTypeDef s_command;
-	uint8_t value = W25Q256JW_FSR_QE;
+	uint8_t value = 0;
 
-	/* QSPI memory reset */
-	if(QSPI_ResetMemory() != QSPI_OK)
+//	Get status register for Quad Enable,the Quad IO2 and IO3 pins are enable
+	s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
+	s_command.Instruction = READ_STATUS_REG2_CMD;
+	s_command.AddressMode = QSPI_ADDRESS_NONE;
+	s_command.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
+	s_command.DataMode = QSPI_DATA_1_LINE;
+	s_command.DummyCycles = 0;
+	s_command.NbData = 1;
+	s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
+	s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
+	s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
+//			 Configure the command
+	if(HAL_QSPI_Command(&hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
 	{
-		return QSPI_NOT_SUPPORTED;
+		return QSPI_ERROR;
 	}
-
-	/* Enable write operations */
-	/*	if(QSPI_WriteEnable() != QSPI_OK)
+//			 Receive the data
+	if(HAL_QSPI_Receive(&hqspi, &value, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
 	{
 		return QSPI_ERROR;
 	}
 
+//			 automatic polling mode to wait for memory ready
+	if(QSPI_AutoPollingMemReady(HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != QSPI_OK)
+	{
+		return QSPI_ERROR;
+	}
 
-	 Set status register for Quad Enable,the Quad IO2 and IO3 pins are enable
+	value |= 0b00000010;
+//	value &= 0b11101101;
+
+	/* Enable write operations */
+	if(QSPI_WriteEnable() != QSPI_OK)
+	{
+		return QSPI_ERROR;
+	}
+
+//		 Set status register for Quad Enable,the Quad IO2 and IO3 pins are enable
 	s_command.InstructionMode = QSPI_INSTRUCTION_1_LINE;
 	s_command.Instruction = WRITE_STATUS_REG2_CMD;
 	s_command.AddressMode = QSPI_ADDRESS_NONE;
@@ -139,24 +158,47 @@ uint8_t BSP_QSPI_Init(void)
 	s_command.DdrMode = QSPI_DDR_MODE_DISABLE;
 	s_command.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
 	s_command.SIOOMode = QSPI_SIOO_INST_EVERY_CMD;
-	 Configure the command
+//		 Configure the command
 	if(HAL_QSPI_Command(&hqspi, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
 	{
 		return QSPI_ERROR;
 	}
-	 Transmit the data
+//		 Transmit the data
 	if(HAL_QSPI_Transmit(&hqspi, &value, HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
 	{
 		return QSPI_ERROR;
 	}
 
-	 automatic polling mode to wait for memory ready
-	if(QSPI_AutoPollingMemReady(10000) != QSPI_OK)
+//		 automatic polling mode to wait for memory ready
+	if(QSPI_AutoPollingMemReady(HAL_QPSI_TIMEOUT_DEFAULT_VALUE) != QSPI_OK)
 	{
-		HAL_GPIO_WritePin(LED_ERROR_GPIO_Port, LED_ERROR_Pin, GPIO_PIN_SET);
+		return QSPI_ERROR;
+	}
+
+	return QSPI_OK;
+}
+
+/**
+ * @brief  Initializes the QSPI interface.
+ * @retval QSPI memory status
+ */
+uint8_t BSP_QSPI_Init(void)
+{
+
+	/* QSPI memory reset */
+	if(QSPI_ResetMemory() != QSPI_OK)
+	{
+		return QSPI_NOT_SUPPORTED;
+	}
+
+/*	if(BSP_QSPI_QE() != QSPI_OK)
+	{
 		return QSPI_ERROR;
 	}*/
-	BSP_QSPI_Enter4ByteAddrMode();
+	if(BSP_QSPI_Enter4ByteAddrMode() != QSPI_OK)
+	{
+		return QSPI_ERROR;
+	}
 	return QSPI_OK;
 }
 
@@ -603,8 +645,6 @@ uint8_t BSP_QSPI_MemoryMappedMode(void)
 	return QSPI_OK;
 }
 
-
-
 uint8_t BSP_QSPI_Enter4ByteAddrMode(void)
 {
 	QSPI_CommandTypeDef s_command;
@@ -623,7 +663,7 @@ uint8_t BSP_QSPI_Enter4ByteAddrMode(void)
 
 	/* Configure the command */
 	if(HAL_QSPI_Command(&QSPIHandle, &s_command, HAL_QPSI_TIMEOUT_DEFAULT_VALUE)
-				!= HAL_OK)
+			!= HAL_OK)
 	{
 		return QSPI_ERROR;
 	}
@@ -633,10 +673,8 @@ uint8_t BSP_QSPI_Enter4ByteAddrMode(void)
 		return QSPI_ERROR;
 	}
 
-
 	return QSPI_OK;
 }
-
 
 /**
  * @}
