@@ -1191,8 +1191,8 @@ void MX_QUADSPI_Init(void)
   /* USER CODE END QUADSPI_Init 1 */
   hqspi.Instance = QUADSPI;
 20000f56:	480c      	ldr	r0, [pc, #48]	; (20000f88 <MX_QUADSPI_Init+0x34>)
-  hqspi.Init.ClockPrescaler = 1;
-20000f58:	2501      	movs	r5, #1
+  hqspi.Init.ClockPrescaler = 2;
+20000f58:	2502      	movs	r5, #2
   hqspi.Instance = QUADSPI;
 20000f5a:	4b0c      	ldr	r3, [pc, #48]	; (20000f8c <MX_QUADSPI_Init+0x38>)
   hqspi.Init.FifoThreshold = 32;
